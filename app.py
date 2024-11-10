@@ -1,5 +1,11 @@
+from typing import List, Set
+from venv import create
+from typing import List, Union
+
 from flask import Flask, Response, request
 
+from closure import create_multiplier
+from higher_order import apply_operation, add, multiply
 from number import Number
 
 
@@ -52,6 +58,65 @@ def palindrome() -> Response:
 def greeting(name:str) -> Response:
     greet = lambda name: f"Hello, {name}!"
     return Response(greet(name))
+
+@app.post("/advanced_calc")
+def advanced_calc() -> Response:
+    data = request.get_json()
+    operation = data["operation"]
+    num1 = data["num1"]
+    num2 = data["num2"]
+    match operation:
+        case "add":
+            action = add
+        case "mult":
+            action = multiply
+
+    result = apply_operation(num1, num2, action)
+    number = str(result)
+    return Response(number, 200)
+
+#B3E
+@app.get("/multiply_by_3/<int:number>")
+def multiply_by_3(number:int) -> Response:
+    multiply_3=create_multiplier(3)
+    result=str(multiply_3(number))
+    return Response(result, 200)
+
+
+@app.post("/text/upper")
+def upper() -> Response:
+    data = request.get_json()
+    text=data["text"]
+    convert_to_upper = lambda text: text.upper()
+    upper = convert_to_upper(text)
+    return Response(upper, 200)
+
+@app.post("/shapes/volume")
+def shapes_volume() -> Response:
+    data = request.get_json()
+    height=data["height"]
+    length=data["length"]
+    width=data["width"]
+    volume = lambda a, b, c: a * b * c
+    result = volume(height, length, width)
+    return Response(str(result), 200)
+
+
+@app.get("/public/users/<criteria>")
+def get_users(criteria: str) -> Union[List[dict], Response]:
+    # List of users as tuples (name, age)
+    users = [{"name": "Anna", "age": 28}, {"name": "Ben", "age": 35}, {"name": "Charlie", "age": 22},
+             {"name": "Diana", "age": 30}]
+
+    if criteria == "n":  # Sort by name
+        sorted_users = sorted(users, key=lambda user: user["name"])
+        return {"users": sorted_users}
+    elif criteria == "a":  # Sort by age
+        sorted_users = sorted(users, key=lambda user: user["age"])
+        return {"users": sorted_users}
+    else:
+        return Response("Invalid criteria. Use 'n' for name or 'a' for age.", status=400)
 app.run()
+
 
 #B2F
