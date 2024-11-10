@@ -5,6 +5,7 @@ from typing import List, Union
 from flask import Flask, Response, request
 
 from closure import create_multiplier
+from funcs import square, eliminate_odd, all_of_them
 from higher_order import apply_operation, add, multiply
 from number import Number
 
@@ -116,6 +117,27 @@ def get_users(criteria: str) -> Union[List[dict], Response]:
         return {"users": sorted_users}
     else:
         return Response("Invalid criteria. Use 'n' for name or 'a' for age.", status=400)
+
+@app.post("/helper/square")
+def square_nums() -> Response:
+    data = request.get_json()
+    return square(data["numbers"])
+
+@app.post("/helper/eliminate_odd")
+def eliminate_odd_nums() -> Response:
+    data = request.get_json()
+    return eliminate_odd(data["numbers"])
+
+@app.post("/helper/sum")
+def sum_nums() -> str:
+    data = request.get_json()
+    return str(sum(data["numbers"]))
+
+@app.post("/helper/all")
+def all_nums() -> str:
+    data = request.get_json()
+    return all_of_them(data["numbers"])
+
 app.run()
 
 
